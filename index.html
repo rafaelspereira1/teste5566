@@ -1,7 +1,7 @@
 <!-- Upfunnels pixel -->
 <script>
   (function () {
-    var ownerId = "66dee3f654bf6b7eac9f8221";
+    var ownerId = "66d24b84199949fc06e212a3";
     var urlParams = new URLSearchParams(window.location.search);
     var isPreview =
       urlParams.has("preview") && urlParams.get("preview") === "true";
@@ -9,7 +9,7 @@
     if (!isPreview) {
       var leadRef =
         document.cookie.replace(
-          /(?:(?:^|.*;\s*)leadRef\s*\=\s*([^;]*).*$)|^.*$/,
+          /(?:(?:^|.*;\s*)leadRef\s*=\s*([^;]*).*$)|^.*$/,
           "$1"
         ) || Math.random().toString(36).substring(2);
       document.cookie = "leadRef=" + leadRef + "; path=/;";
@@ -17,6 +17,20 @@
       var apiUrl = "https://api.dev.upfunnels.com";
 
       var fullPath = window.location.href;
+
+      function validateAndFormatUrl(url) {
+        const sanitizedUrl = url.replace(/\/+$/, "");
+
+        if (sanitizedUrl.startsWith("http://")) {
+          return sanitizedUrl.replace("http://", "https://");
+        } else if (!sanitizedUrl.startsWith("https://")) {
+          return `https://${sanitizedUrl}`;
+        }
+        return sanitizedUrl;
+      }
+
+      fullPath = validateAndFormatUrl(fullPath);
+
       var body = { leadRef: leadRef, fullPath: fullPath };
       var debugBody = { fullPath: fullPath };
 
