@@ -1,7 +1,7 @@
 <!-- Upfunnels pixel -->
 <script>
   (function () {
-    var ownerId = "66eb4c998eaae1b0bc973f97";
+    var ownerId = "66dee3f654bf6b7eac9f8221";
     var urlParams = new URLSearchParams(window.location.search);
     var isPreview =
       urlParams.has("preview") && urlParams.get("preview") === "true";
@@ -9,7 +9,7 @@
     if (!isPreview) {
       var leadRef =
         document.cookie.replace(
-          /(?:(?:^|.*;\s*)leadRef\s*\=\s*([^;]*).*$)|^.*$/,
+          /(?:(?:^|.*;\s*)leadRef\s*=\s*([^;]*).*$)|^.*$/,
           "$1"
         ) || Math.random().toString(36).substring(2);
       document.cookie = "leadRef=" + leadRef + "; path=/;";
@@ -55,7 +55,48 @@
           headers: { "Content-Type": "application/json" },
         }).catch(console.error);
       }, 2 * 60 * 60 * 1000);
+
+      document.querySelectorAll("form").forEach(function (form) {
+        form.addEventListener("submit", function (event) {
+          var input = document.createElement("input");
+          input.type = "hidden";
+          input.name = "leadRef";
+          input.value = leadRef;
+          form.appendChild(input);
+        });
+      });
     }
   })();
 </script>
 <!-- Upfunnels pixel -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form Submission</title>
+  </head>
+  <body>
+    <h1>Test Form</h1>
+    <form
+      action="http://localhost:3000/external-webhook/66deeb3554bf6b7eac9f850a"
+      method="POST"
+    >
+      <label for="name">Name:</label><br />
+      <input type="text" id="name" name="name" required /><br /><br />
+
+      <label for="email">Email:</label><br />
+      <input type="email" id="email" name="email" required /><br /><br />
+
+      <label for="age">Age:</label><br />
+      <input type="number" id="age" name="age" /><br /><br />
+
+      <label for="message">Message:</label><br />
+      <textarea id="message" name="message" rows="4" cols="50"></textarea
+      ><br /><br />
+
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>
