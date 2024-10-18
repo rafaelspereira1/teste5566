@@ -1,72 +1,83 @@
 <!-- Upfunnels pixel -->
 <script>
-  (function () {
-    var ownerId = "66dee3f654bf6b7eac9f8221";
-    var urlParams = new URLSearchParams(window.location.search);
-    var isPreview =
-      urlParams.has("preview") && urlParams.get("preview") === "true";
+  document.addEventListener("DOMContentLoaded", function () {
+    (function () {
+      var ownerId = "66d24b84199949fc06e212a3";
+      var urlParams = new URLSearchParams(window.location.search);
+      var isPreview =
+        urlParams.has("preview") && urlParams.get("preview") === "true";
 
-    if (!isPreview) {
-      var leadRef =
-        document.cookie.replace(
-          /(?:(?:^|.*;\s*)leadRef\s*=\s*([^;]*).*$)|^.*$/,
-          "$1"
-        ) || Math.random().toString(36).substring(2);
-      document.cookie = "leadRef=" + leadRef + "; path=/;";
+      if (!isPreview) {
+        var leadRef =
+          document.cookie.replace(
+            /(?:(?:^|.*;\s*)leadRef\s*\=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          ) || Math.random().toString(36).substring(2);
+        document.cookie = "leadRef=" + leadRef + "; path=/;";
 
-      var apiUrl = "https://api.dev.upfunnels.com";
+        var apiUrl = "https://api.dev.upfunnels.com";
 
-      var fullPath = window.location.href;
-      var body = { leadRef: leadRef, fullPath: fullPath };
-      var debugBody = { fullPath: fullPath };
+        var fullPath = window.location.href;
+        var body = { leadRef: leadRef, fullPath: fullPath };
+        var debugBody = { fullPath: fullPath };
 
-      fetch(apiUrl + "/page/debug", {
-        method: "POST",
-        body: JSON.stringify(debugBody),
-        headers: { "Content-Type": "application/json" },
-      }).catch(console.error);
+        fetch(apiUrl + "/page/debug", {
+          method: "POST",
+          body: JSON.stringify(debugBody),
+          headers: { "Content-Type": "application/json" },
+        }).catch(console.error);
 
-      fetch(apiUrl + "/visits/total", {
-        method: "POST",
-        body: JSON.stringify(body),
-        headers: { "Content-Type": "application/json" },
-      }).catch(console.error);
-
-      fetch(apiUrl + "/visits/unique", {
-        method: "POST",
-        body: JSON.stringify(body),
-        headers: { "Content-Type": "application/json" },
-      }).catch(function (error) {
-        if (error.response && error.response.status === 409) {
-          console.log(error);
-        }
-      });
-
-      fetch(apiUrl + "/leads/external/" + leadRef, {
-        method: "PATCH",
-        body: JSON.stringify({ fullPath: fullPath }),
-        headers: { "Content-Type": "application/json" },
-      }).catch(console.error);
-
-      setInterval(function () {
         fetch(apiUrl + "/visits/total", {
           method: "POST",
           body: JSON.stringify(body),
           headers: { "Content-Type": "application/json" },
         }).catch(console.error);
-      }, 2 * 60 * 60 * 1000);
 
-      document.querySelectorAll("form").forEach(function (form) {
-        form.addEventListener("submit", function (event) {
+        fetch(apiUrl + "/visits/unique", {
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: { "Content-Type": "application/json" },
+        }).catch(function (error) {
+          if (error.response && error.response.status === 409) {
+            console.log(error);
+          }
+        });
+
+        fetch(apiUrl + "/leads/external/" + leadRef, {
+          method: "PATCH",
+          body: JSON.stringify({ fullPath: fullPath }),
+          headers: { "Content-Type": "application/json" },
+        }).catch(console.error);
+
+        setInterval(function () {
+          fetch(apiUrl + "/visits/total", {
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: { "Content-Type": "application/json" },
+          }).catch(console.error);
+        }, 2 * 60 * 60 * 1000);
+
+        document.querySelectorAll("form").forEach(function (form) {
           var input = document.createElement("input");
           input.type = "hidden";
           input.name = "leadRef";
           input.value = leadRef;
           form.appendChild(input);
+
+          form.addEventListener("submit", function (event) {
+            var existingInput = form.querySelector('input[name="leadRef"]');
+            if (!existingInput) {
+              var input = document.createElement("input");
+              input.type = "hidden";
+              input.name = "leadRef";
+              input.value = leadRef;
+              form.appendChild(input);
+            }
+          });
         });
-      });
-    }
-  })();
+      }
+    })();
+  });
 </script>
 <!-- Upfunnels pixel -->
 
@@ -79,10 +90,7 @@
   </head>
   <body>
     <h1>Test Form</h1>
-    <form
-      action="http://localhost:3000/external-webhook/66deeb3554bf6b7eac9f850a"
-      method="POST"
-    >
+    <form id="testForm">
       <label for="name">Name:</label><br />
       <input type="text" id="name" name="name" required /><br /><br />
 
@@ -98,5 +106,37 @@
 
       <button type="submit">Submit</button>
     </form>
+
+    <script>
+      document
+        .getElementById("testForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault(); // Prevent the default form submission
+
+          const formData = new FormData(this);
+          const data = {};
+          formData.forEach((value, key) => {
+            data[key] = value;
+          });
+
+          fetch(
+            "https://api.dev.upfunnels.com/external-webhook/66deeb3554bf6b7eac9f850a",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            }
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Success:", data);
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+    </script>
   </body>
 </html>
