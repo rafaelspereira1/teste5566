@@ -1,0 +1,57 @@
+<script type="text/javascript">
+  window.getCrawler = function () {
+    let user = {};
+    if (document.cookie != "") {
+      let split = document.cookie.split(";");
+      for (var i = 0; i < split.length; i++) {
+        var conteudo = split[i].split("=");
+        if (conteudo[0].indexOf("gpages_user") !== -1) {
+          user = JSON.parse(
+            decodeURI(conteudo[1])
+              .replaceAll("%3A", ":")
+              .replaceAll("%2C", ",")
+              .replaceAll("%2F", "/")
+              .replaceAll("%3B", ";")
+          );
+        }
+      }
+    }
+    if (typeof navigator.userAgentData != "undefined") {
+      let retorno = false;
+      navigator.userAgentData.brands.forEach(function (item) {
+        if (
+          item.brand.toLowerCase() == "lighthouse" ||
+          item.brand.toLowerCase() == "gtmetrix"
+        ) {
+          retorno = true;
+        }
+      });
+      if (!retorno) {
+        retorno =
+          window.navigator.userAgent.indexOf("GTmetrix") !== -1 ? true : false;
+      }
+      if (user?.agent) {
+        retorno =
+          user.agent.indexOf("GTmetrix") !== -1 ||
+          user.agent.indexOf("Lighthouse") !== -1
+            ? true
+            : false;
+      }
+      return retorno;
+    } else {
+      if (
+        window.navigator.userAgent.indexOf("GTmetrix") !== -1 ||
+        window.navigator.userAgent.indexOf("Lighthouse") !== -1
+      ) {
+        return true;
+      } else if (user?.agent) {
+        return user.agent.indexOf("GTmetrix") !== -1 ||
+          user.agent.indexOf("Lighthouse") !== -1
+          ? true
+          : false;
+      } else {
+        return false;
+      }
+    }
+  };
+</script>
