@@ -319,13 +319,16 @@
             data[key] = value;
           });
 
-          fetch("https://smee.io/TuvgNUGIEUWqO4nO", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-          })
+          fetch(
+            "https://api.dev.upfunnels.com/external-webhook/675c1a8a9524f728d7886578",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            }
+          )
             .then((response) => response.json())
             .then((data) => {
               console.log("Success:", data);
