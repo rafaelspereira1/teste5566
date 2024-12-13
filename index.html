@@ -319,13 +319,16 @@
             data[key] = value;
           });
 
-          fetch("https://smee.io/TuvgNUGIEUWqO4nO", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-          })
+          fetch(
+            "https://api.dev.upfunnels.com/external-webhook/6750b3c9fa03c7178c85c14b",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            }
+          )
             .then((response) => response.json())
             .then((data) => {
               console.log("Success:", data);
@@ -409,7 +412,7 @@
             id="i0ql6"
             type="text"
             name="whatsApp"
-            maxlength="20"
+            maxlength="25"
             style="
               border: 1px solid rgb(163, 186, 198);
               border-radius: 10px;
@@ -1071,8 +1074,8 @@
         { code: "+49 ### ### ####" },
         { code: "+52 ### ### ####" },
         { code: "+54 ### ### ####" },
-        { code: "+55 ## ##### ####" },
-        { code: "+55 ## 7### ####" },
+        { code: "+55 ## ##### #####" },
+        { code: "+55 ## ##### #####" },
         { code: "+57 ### ### ####" },
         { code: "+58 ### ### ####" },
         { code: "+590 ### ### ###" },
@@ -1110,7 +1113,7 @@
         { code: "+380 ## ### ## ##" },
         { code: "+423 ### ### ####" },
         { code: "+49 #### ### ####" },
-        { code: "+55 ## 9#### ####" },
+        { code: "+55 ## ##### #####" },
         { code: "+596 ### ## ## ##" },
         { code: "+850 ### #### ###" },
         { code: "+850 191 ### ####" },
