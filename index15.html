@@ -33,6 +33,217 @@
     background-image: url("data:image/svg+xml,%3Csvg%20width%3D%228%22%20height%3D%225%22%20viewBox%3D%220%200%208%205%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M3.99987%202.80039L1.39987%200.20039C1.27765%200.0781679%201.12209%200.0170565%200.933203%200.0170565C0.744314%200.0170565%200.588758%200.0781679%200.466536%200.20039C0.344314%200.322613%200.283203%200.478168%200.283203%200.667057C0.283203%200.855946%200.344314%201.0115%200.466536%201.13372L3.5332%204.20039C3.66654%204.33372%203.82209%204.40039%203.99987%204.40039C4.17765%204.40039%204.3332%204.33372%204.46654%204.20039L7.5332%201.13372C7.65543%201.0115%207.71654%200.855946%207.71654%200.667057C7.71654%200.478168%207.65543%200.322613%207.5332%200.20039C7.41098%200.0781679%207.25543%200.0170565%207.06654%200.0170565C6.87765%200.0170565%206.72209%200.0781679%206.59987%200.20039L3.99987%202.80039Z%22%20fill%3D%22%23444444%22%2F%3E%3C%2Fsvg%3E");
   }
 </style>
+<!-- Upfunnels pixel -->
+<script>
+  (function () {
+    var ownerId = "6744cb1aeb3f7ee8ab5cd9b9";
+    var urlParams = new URLSearchParams(window.location.search);
+    var isPreview =
+      urlParams.has("preview") && urlParams.get("preview") === "true";
+
+    if (!isPreview) {
+      function getCookie(name) {
+        var match = document.cookie.match(
+          new RegExp("(^| )" + name + "=([^;]+)")
+        );
+        if (match) return match[2];
+      }
+
+      function isLeadRefField(name) {
+        if (!name) return false;
+
+        name = name.toLowerCase();
+
+        if (name === "leadref") return true;
+
+        if (name.includes("[") && name.includes("]")) {
+          var fieldMatch = name.match(/[(.*?)]/);
+          if (fieldMatch && fieldMatch[1]) {
+            var fieldName = fieldMatch[1].toLowerCase();
+            return fieldName === "leadref";
+          }
+        }
+
+        return false;
+      }
+
+      function findLeadRefInput(form) {
+        var inputs = form.getElementsByTagName("input");
+        return Array.from(inputs).find((input) => isLeadRefField(input.name));
+      }
+
+      function getOriginalLeadRefCase(form) {
+        var inputs = form.getElementsByTagName("input");
+        for (var input of inputs) {
+          if (isLeadRefField(input.name)) {
+            if (input.name.includes("[")) {
+              var match = input.name.match(/[(.*?)]/);
+              if (match) return match[1];
+            }
+            return input.name;
+          }
+        }
+
+        var groups = form.querySelectorAll('[class*="field-group-"]');
+        for (var group of groups) {
+          var classes = Array.from(group.classList);
+          var leadRefClass = classes.find(
+            (cls) =>
+              cls.toLowerCase().includes("leadref") ||
+              cls.toLowerCase().includes("lead-ref") ||
+              cls.toLowerCase().includes("lead_ref")
+          );
+          if (leadRefClass) {
+            var match = leadRefClass.match(/field-group-(.*)/i);
+            if (match) return match[1];
+          }
+        }
+
+        return "leadRef";
+      }
+
+      function getOrCreateLeadRefInput(form) {
+        var existingLeadRef = findLeadRefInput(form);
+        var cookieLeadRef =
+          getCookie("leadRef") || Math.random().toString(36).substring(2);
+
+        if (existingLeadRef) {
+          existingLeadRef.value = cookieLeadRef;
+          return existingLeadRef;
+        } else {
+          var isElementorForm = form.classList.contains("elementor-form");
+
+          var hiddenInput = document.createElement("input");
+          hiddenInput.type = "hidden";
+
+          var leadRefName = getOriginalLeadRefCase(form);
+
+          if (isElementorForm) {
+            hiddenInput.name = "form_fields[" + leadRefName + "]";
+            hiddenInput.className =
+              "elementor-field elementor-size-sm elementor-field-textual";
+
+            hiddenInput.id = "form-field-" + leadRefName.toLowerCase();
+          } else {
+            hiddenInput.name = leadRefName;
+          }
+
+          hiddenInput.value = cookieLeadRef;
+
+          if (isElementorForm) {
+            var wrapper = document.createElement("div");
+            var fieldGroupClass =
+              "elementor-field-group-" + leadRefName.toLowerCase();
+            wrapper.className =
+              "elementor-field-type-hidden elementor-field-group elementor-column " +
+              fieldGroupClass +
+              " elementor-col-100";
+            wrapper.appendChild(hiddenInput);
+
+            var submitWrapper =
+              form.querySelector(".e-form__buttons") ||
+              form.querySelector(".elementor-form-fields-wrapper")
+                .lastElementChild;
+
+            if (submitWrapper) {
+              submitWrapper.parentNode.insertBefore(wrapper, submitWrapper);
+            } else {
+              form
+                .querySelector(".elementor-form-fields-wrapper")
+                .appendChild(wrapper);
+            }
+          } else {
+            form.appendChild(hiddenInput);
+          }
+
+          return hiddenInput;
+        }
+      }
+
+      function setupFormObserver() {
+        processAllForms();
+
+        var observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
+              if (node.nodeName === "FORM") {
+                getOrCreateLeadRefInput(node);
+              } else if (node.getElementsByTagName) {
+                var forms = node.getElementsByTagName("form");
+                Array.from(forms).forEach(function (form) {
+                  getOrCreateLeadRefInput(form);
+                });
+              }
+            });
+          });
+        });
+
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+        });
+      }
+
+      function processAllForms() {
+        var forms = document.getElementsByTagName("form");
+        Array.from(forms).forEach(function (form) {
+          getOrCreateLeadRefInput(form);
+        });
+      }
+
+      var leadRef =
+        getCookie("leadRef") || Math.random().toString(36).substring(2);
+      document.cookie = "leadRef=" + leadRef + ";path=/;";
+      var apiUrl = "https://api.upfunnels.com";
+      var fullPath = window.location.href;
+      var body = { leadRef: leadRef, fullPath: fullPath };
+      var debugBody = { fullPath: fullPath };
+
+      fetch(apiUrl + "/page/debug", {
+        method: "POST",
+        body: JSON.stringify(debugBody),
+        headers: { "Content-Type": "application/json" },
+      }).catch(console.error);
+
+      fetch(apiUrl + "/visits/total", {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: { "Content-Type": "application/json" },
+      }).catch(console.error);
+
+      fetch(apiUrl + "/visits/unique", {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: { "Content-Type": "application/json" },
+      }).catch(function (error) {
+        if (error.response && error.response.status === 409) {
+          console.log(error);
+        }
+      });
+
+      fetch(apiUrl + "/leads/external/" + leadRef, {
+        method: "PATCH",
+        body: JSON.stringify({ fullPath: fullPath }),
+        headers: { "Content-Type": "application/json" },
+      }).catch(console.error);
+
+      setInterval(function () {
+        fetch(apiUrl + "/visits/total", {
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: { "Content-Type": "application/json" },
+        }).catch(console.error);
+      }, 2 * 60 * 60 * 1000);
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", setupFormObserver);
+      } else {
+        setupFormObserver();
+      }
+    }
+  })();
+</script>
+<!-- Upfunnels pixel -->
 <form
   id="ibspf"
   method="post"
