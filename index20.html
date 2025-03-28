@@ -1,3 +1,215 @@
+<!-- Upfunnels pixel -->
+<script>
+  (function () {
+    var ownerId = "67e4374b40cf3b4183826473";
+    var urlParams = new URLSearchParams(window.location.search);
+    var isPreview =
+      urlParams.has("preview") && urlParams.get("preview") === "true";
+
+    if (!isPreview) {
+      function getCookie(name) {
+        var match = document.cookie.match(
+          new RegExp("(^| )" + name + "=([^;]+)")
+        );
+        if (match) return match[2];
+      }
+
+      function isLeadRefField(name) {
+        if (!name) return false;
+
+        name = name.toLowerCase();
+
+        if (name === "leadref") return true;
+
+        if (name.includes("[") && name.includes("]")) {
+          var fieldMatch = name.match(/[(.*?)]/);
+          if (fieldMatch && fieldMatch[1]) {
+            var fieldName = fieldMatch[1].toLowerCase();
+            return fieldName === "leadref";
+          }
+        }
+
+        return false;
+      }
+
+      function findLeadRefInput(form) {
+        var inputs = form.getElementsByTagName("input");
+        return Array.from(inputs).find((input) => isLeadRefField(input.name));
+      }
+
+      function getOriginalLeadRefCase(form) {
+        var inputs = form.getElementsByTagName("input");
+        for (var input of inputs) {
+          if (isLeadRefField(input.name)) {
+            if (input.name.includes("[")) {
+              var match = input.name.match(/[(.*?)]/);
+              if (match) return match[1];
+            }
+            return input.name;
+          }
+        }
+
+        var groups = form.querySelectorAll('[class*="field-group-"]');
+        for (var group of groups) {
+          var classes = Array.from(group.classList);
+          var leadRefClass = classes.find(
+            (cls) =>
+              cls.toLowerCase().includes("leadref") ||
+              cls.toLowerCase().includes("lead-ref") ||
+              cls.toLowerCase().includes("lead_ref")
+          );
+          if (leadRefClass) {
+            var match = leadRefClass.match(/field-group-(.*)/i);
+            if (match) return match[1];
+          }
+        }
+
+        return "leadRef";
+      }
+
+      function getOrCreateLeadRefInput(form) {
+        var existingLeadRef = findLeadRefInput(form);
+        var cookieLeadRef =
+          getCookie("leadRef") || Math.random().toString(36).substring(2);
+
+        if (existingLeadRef) {
+          existingLeadRef.value = cookieLeadRef;
+          return existingLeadRef;
+        } else {
+          var isElementorForm = form.classList.contains("elementor-form");
+
+          var hiddenInput = document.createElement("input");
+          hiddenInput.type = "hidden";
+
+          var leadRefName = getOriginalLeadRefCase(form);
+
+          if (isElementorForm) {
+            hiddenInput.name = "form_fields[" + leadRefName + "]";
+            hiddenInput.className =
+              "elementor-field elementor-size-sm elementor-field-textual";
+
+            hiddenInput.id = "form-field-" + leadRefName.toLowerCase();
+          } else {
+            hiddenInput.name = leadRefName;
+          }
+
+          hiddenInput.value = cookieLeadRef;
+
+          if (isElementorForm) {
+            var wrapper = document.createElement("div");
+            var fieldGroupClass =
+              "elementor-field-group-" + leadRefName.toLowerCase();
+            wrapper.className =
+              "elementor-field-type-hidden elementor-field-group elementor-column " +
+              fieldGroupClass +
+              " elementor-col-100";
+            wrapper.appendChild(hiddenInput);
+
+            var submitWrapper =
+              form.querySelector(".e-form__buttons") ||
+              form.querySelector(".elementor-form-fields-wrapper")
+                .lastElementChild;
+
+            if (submitWrapper) {
+              submitWrapper.parentNode.insertBefore(wrapper, submitWrapper);
+            } else {
+              form
+                .querySelector(".elementor-form-fields-wrapper")
+                .appendChild(wrapper);
+            }
+          } else {
+            form.appendChild(hiddenInput);
+          }
+
+          return hiddenInput;
+        }
+      }
+
+      function setupFormObserver() {
+        processAllForms();
+
+        var observer = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
+              if (node.nodeName === "FORM") {
+                getOrCreateLeadRefInput(node);
+              } else if (node.getElementsByTagName) {
+                var forms = node.getElementsByTagName("form");
+                Array.from(forms).forEach(function (form) {
+                  getOrCreateLeadRefInput(form);
+                });
+              }
+            });
+          });
+        });
+
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+        });
+      }
+
+      function processAllForms() {
+        var forms = document.getElementsByTagName("form");
+        Array.from(forms).forEach(function (form) {
+          getOrCreateLeadRefInput(form);
+        });
+      }
+
+      var leadRef =
+        getCookie("leadRef") || Math.random().toString(36).substring(2);
+      document.cookie = "leadRef=" + leadRef + ";path=/;";
+      var apiUrl = "https://api-dev.upfunnels.com";
+      var fullPath = window.location.href;
+      var body = { leadRef: leadRef, fullPath: fullPath };
+      var debugBody = { fullPath: fullPath };
+
+      function safeSendData(url, data, method = "POST") {
+        return fetch(url, {
+          method: method,
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          keepalive: true,
+          mode: "cors",
+        }).catch(console.error);
+      }
+
+      safeSendData(
+        apiUrl + "/leads/external/" + leadRef,
+        { fullPath: fullPath },
+        "PATCH"
+      );
+
+      safeSendData(apiUrl + "/page/debug", debugBody);
+
+      safeSendData(apiUrl + "/visits/total", body);
+
+      safeSendData(apiUrl + "/visits/unique", body).catch(function (error) {
+        if (error.response && error.response.status === 409) {
+          console.log(error);
+        }
+      });
+
+      setInterval(function () {
+        fetch(apiUrl + "/visits/total", {
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: { "Content-Type": "application/json" },
+        }).catch(console.error);
+      }, 2 * 60 * 60 * 1000);
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", setupFormObserver);
+      } else {
+        setupFormObserver();
+      }
+    }
+  })();
+</script>
+<!-- Upfunnels pixel -->
+
 <style>
   .dropdown-item:hover {
     background-color: #f2f2f2;
@@ -39,8 +251,8 @@
   class="gjs-selected"
   style="width: auto; left: 857px; top: 481px"
 >
-  <span id="funnelId" style="display: none">67ae2f564d81668c43b20013</span>
-  <span id="pageId" style="display: none">67b37ac6620f51645a71c60a</span>
+  <span id="funnelId" style="display: none">67e48502b104681508c4ea5e</span>
+  <span id="pageId" style="display: none">67e48597b104681508c4ea90</span>
   <span id="inuzq" style="display: grid; margin-bottom: 16px"
     ><label
       id="ip6p5"
@@ -1942,7 +2154,7 @@
   ];
 
   function fetchForm(payloadData, msgError, msgSuccess, button, redirectURL) {
-    fetch(`http://localhost:3000/leads`, {
+    fetch(`https://api-dev.upfunnels.com/leads`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
