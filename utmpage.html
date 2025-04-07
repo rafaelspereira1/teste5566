@@ -149,7 +149,7 @@
       var leadRef =
         getCookie("leadRef") || Math.random().toString(36).substring(2);
       document.cookie = "leadRef=" + leadRef + ";path=/;";
-      var apiUrl = "http://localhost:3000";
+      var apiUrl = "https://api-dev.upfunnels.com";
       var fullPath = window.location.href;
       var body = { leadRef: leadRef, fullPath: fullPath };
       var debugBody = { fullPath: fullPath };
@@ -159,7 +159,7 @@
 
       setInterval(function () {
         safeSendData(
-          apiUrl + "/leads/external/" + leadRef,
+          "https://smee.io/9Th0pyzkfMCEtZu",
           {
             fullPath: fullPath,
             utm_campaign: utm_campaign,
@@ -195,7 +195,7 @@
       }
 
       safeSendData(
-        apiUrl + "/leads/external/" + leadRef,
+        "https://smee.io/9Th0pyzkfMCEtZu",
         {
           fullPath: fullPath,
           utm_campaign: utm_campaign,
