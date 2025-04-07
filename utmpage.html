@@ -149,26 +149,25 @@
       var leadRef =
         getCookie("leadRef") || Math.random().toString(36).substring(2);
       document.cookie = "leadRef=" + leadRef + ";path=/;";
-      var apiUrl = "https://smee.io/o6cgJF4hAjKSP9xw";
+      var apiUrl = "http://localhost:3000";
       var fullPath = window.location.href;
+      var body = { leadRef: leadRef, fullPath: fullPath };
+      var debugBody = { fullPath: fullPath };
       var utm_campaign = urlParams.get("utm_campaign") || null;
       var utm_source = urlParams.get("utm_source") || null;
       var utm_medium = urlParams.get("utm_medium") || null;
 
-      var body = {
-        leadRef: leadRef,
-        fullPath: fullPath,
-        utm_campaign: utm_campaign,
-        utm_source: utm_source,
-        utm_medium: utm_medium,
-      };
-
-      var debugBody = { fullPath: fullPath };
-
       setInterval(function () {
-        safeSendData(apiUrl, { fullPath: fullPath }, "PATCH").catch(
-          console.error
-        );
+        safeSendData(
+          apiUrl + "/leads/external/" + leadRef,
+          {
+            fullPath: fullPath,
+            utm_campaign: utm_campaign,
+            utm_source: utm_source,
+            utm_medium: utm_medium,
+          },
+          "PATCH"
+        ).catch(console.error);
       }, 3000);
 
       function safeSendData(url, data, method = "POST") {
@@ -195,7 +194,16 @@
           });
       }
 
-      safeSendData(apiUrl, { fullPath: fullPath }, "PATCH");
+      safeSendData(
+        apiUrl + "/leads/external/" + leadRef,
+        {
+          fullPath: fullPath,
+          utm_campaign: utm_campaign,
+          utm_source: utm_source,
+          utm_medium: utm_medium,
+        },
+        "PATCH"
+      );
       safeSendData(apiUrl + "/page/debug", debugBody);
       safeSendData(apiUrl + "/visits/total", body);
       safeSendData(apiUrl + "/visits/unique", body).catch(function (error) {
