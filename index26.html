@@ -319,16 +319,13 @@
             data[key] = value;
           });
 
-          fetch(
-            "https://api-dev.upfunnels.com/funnel/webhook/listener/68d40f5e0d1cdc7ba2d69858",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(data),
-            }
-          )
+          fetch("https://smee.io/toxvGFRMyWQHqeCt", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          })
             .then((response) => response.json())
             .then((data) => {
               console.log("Success:", data);
@@ -596,16 +593,13 @@
             funnelId: funnelId,
           };
 
-          fetch(
-            `https://api-dev.upfunnels.com/funnel/webhook/listener/68d1c2860b063d778a9fa00d`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(payloadData),
-            }
-          )
+          fetch(`https://smee.io/toxvGFRMyWQHqeCt`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payloadData),
+          })
             .then((response) => {
               if (!response.ok) {
                 response.json().then((errorData) => {
@@ -751,16 +745,13 @@
             funnelId: funnelId,
           };
 
-          fetch(
-            `https://api-dev.upfunnels.com/funnel/webhook/listener/68d1c2860b063d778a9fa00d`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(payloadData),
-            }
-          )
+          fetch(`https://smee.io/toxvGFRMyWQHqeCt`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payloadData),
+          })
             .then((response) => {
               if (!response.ok) {
                 response.json().then((errorData) => {
