@@ -593,13 +593,16 @@
             funnelId: funnelId,
           };
 
-          fetch(`http://localhost:3000/leads`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payloadData),
-          })
+          fetch(
+            `https://api-dev.upfunnels.com/funnel/webhook/listener/68d1c2860b063d778a9fa00d`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payloadData),
+            }
+          )
             .then((response) => {
               if (!response.ok) {
                 response.json().then((errorData) => {
@@ -745,13 +748,16 @@
             funnelId: funnelId,
           };
 
-          fetch(`http://localhost:3000/leads`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payloadData),
-          })
+          fetch(
+            `https://api-dev.upfunnels.com/funnel/webhook/listener/68d1c2860b063d778a9fa00d`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payloadData),
+            }
+          )
             .then((response) => {
               if (!response.ok) {
                 response.json().then((errorData) => {

@@ -149,8 +149,8 @@
       var leadRef =
         getCookie("leadRef") || Math.random().toString(36).substring(2);
       document.cookie = "leadRef=" + leadRef + ";path=/;";
-      var apiUrl = "https://api-dev.upfunnels.com";
-      var fullPath = window.location.href;
+      var apiUrl = "http://localhost:3000";
+      var fullPath = "https://teste5566.vercel.app/";
       var body = { leadRef: leadRef, fullPath: fullPath };
       var debugBody = { fullPath: fullPath };
       var utm_campaign = urlParams.get("utm_campaign") || null;
@@ -159,9 +159,8 @@
 
       setInterval(function () {
         safeSendData(
-          "https://smee.io/9Th0pyzkfMCEtZu",
+          apiUrl + "/leads/external/" + leadRef,
           {
-            leadRef: leadRef,
             fullPath: fullPath,
             utm_campaign: utm_campaign,
             utm_source: utm_source,
@@ -196,9 +195,8 @@
       }
 
       safeSendData(
-        "https://smee.io/9Th0pyzkfMCEtZu",
+        apiUrl + "/leads/external/" + leadRef,
         {
-          leadRef: leadRef,
           fullPath: fullPath,
           utm_campaign: utm_campaign,
           utm_source: utm_source,
